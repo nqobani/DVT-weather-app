@@ -1,7 +1,5 @@
 package com.example.zulu.dvtweatherapp.adapters;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,10 +10,9 @@ import com.example.zulu.dvtweatherapp.R;
 import com.example.zulu.dvtweatherapp.adapters.viewholders.WeatherViewHolder;
 import com.example.zulu.dvtweatherapp.models.WeatherList;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
+
+import static com.example.zulu.dvtweatherapp.utils.DateConvertor.convertStringToDate;
 
 public class FiveDayWeatherForecastAdapter extends RecyclerView.Adapter<WeatherViewHolder> {
 
@@ -65,15 +62,4 @@ public class FiveDayWeatherForecastAdapter extends RecyclerView.Adapter<WeatherV
         notifyDataSetChanged();
     }
 
-    private Date convertStringToDate(String dateString){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = null;
-        try {
-            date = simpleDateFormat.parse(dateString);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return  date;
-    }
 }

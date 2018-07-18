@@ -4,8 +4,6 @@ import com.example.zulu.dvtweatherapp.interactors.interfaces.WeatherInteractor;
 import com.example.zulu.dvtweatherapp.ui.home.HomeInterface;
 import com.example.zulu.dvtweatherapp.ui.home.HomePresenterImpl;
 
-import javax.inject.Inject;
-
 import dagger.Module;
 import dagger.Provides;
 import io.reactivex.disposables.CompositeDisposable;

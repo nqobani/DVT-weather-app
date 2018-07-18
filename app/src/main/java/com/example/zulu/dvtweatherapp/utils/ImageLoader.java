@@ -4,16 +4,15 @@ import android.content.Context;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.example.zulu.dvtweatherapp.R;
 
 public class ImageLoader {
 
-    public static void loadImage(Context context, ImageView imageView, String url, Boolean hasPlaceHolder){
+    public static void loadImage(Context context, ImageView imageView, String url){
         Glide.with(context)
                 .load(url)
                 .into(imageView);
     }
-    public static void loadImage(Context context, ImageView imageView, int drawableId, Boolean hasPlaceHolder){
+    public static void loadImage(Context context, ImageView imageView, int drawableId){
         Glide.with(context)
                 .load(drawableId)
                 .into(imageView);

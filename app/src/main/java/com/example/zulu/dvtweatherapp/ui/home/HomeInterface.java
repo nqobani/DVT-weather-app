@@ -1,7 +1,6 @@
 package com.example.zulu.dvtweatherapp.ui.home;
 
 import com.example.zulu.dvtweatherapp.models.CurrentWeatherResponse;
-import com.example.zulu.dvtweatherapp.models.FiveDayWeatherResponse;
 import com.example.zulu.dvtweatherapp.models.WeatherList;
 
 import java.util.List;

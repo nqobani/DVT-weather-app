@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.zulu.dvtweatherapp.R;
-import com.example.zulu.dvtweatherapp.utils.ImageLoader;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,6 +40,6 @@ public class WeatherViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void setIcon(int drawableId){
-        loadImage(mContext, mImageViewWeatherIcon, drawableId,false);
+        loadImage(mContext, mImageViewWeatherIcon, drawableId);
     }
 }

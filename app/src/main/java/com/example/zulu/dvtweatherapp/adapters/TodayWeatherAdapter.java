@@ -10,10 +10,9 @@ import com.example.zulu.dvtweatherapp.R;
 import com.example.zulu.dvtweatherapp.adapters.viewholders.TodayWeatherViewHolder;
 import com.example.zulu.dvtweatherapp.models.WeatherList;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
+
+import static com.example.zulu.dvtweatherapp.utils.DateConvertor.convertStringToDate;
 
 public class TodayWeatherAdapter extends RecyclerView.Adapter<TodayWeatherViewHolder> {
 
@@ -71,18 +70,5 @@ public class TodayWeatherAdapter extends RecyclerView.Adapter<TodayWeatherViewHo
         mWeatherList.clear();
         mWeatherList = weatherList;
         notifyDataSetChanged();
-    }
-
-
-    private Date convertStringToDate(String dateString){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = null;
-        try {
-            date = simpleDateFormat.parse(dateString);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return  date;
     }
 }

@@ -41,7 +41,7 @@ public class TodayWeatherViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void setIcon(int drawableId){
-        loadImage(mContext, mImageViewTodayWeatherIcon, drawableId,false);
+        loadImage(mContext, mImageViewTodayWeatherIcon, drawableId);
     }
 
 

@@ -7,9 +7,6 @@ import com.example.zulu.dvtweatherapp.models.CurrentWeatherResponse;
 import com.example.zulu.dvtweatherapp.models.FiveDayWeatherResponse;
 import com.example.zulu.dvtweatherapp.network.interafaces.WeatherAPIGateway;
 
-
-import javax.inject.Inject;
-
 import io.reactivex.Observable;
 
 public class WeatherGateway {

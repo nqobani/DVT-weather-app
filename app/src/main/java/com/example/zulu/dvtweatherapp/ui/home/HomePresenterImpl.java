@@ -7,16 +7,15 @@ import com.example.zulu.dvtweatherapp.models.FiveDayWeatherResponse;
 import com.example.zulu.dvtweatherapp.models.WeatherList;
 import com.example.zulu.dvtweatherapp.ui.home.listeners.FiveDayWeatherForecastListener;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import io.reactivex.disposables.CompositeDisposable;
+
+import static com.example.zulu.dvtweatherapp.utils.DateConvertor.convertStringToDate;
 
 public class HomePresenterImpl implements HomeInterface.HomePresenter {
 
@@ -100,15 +99,4 @@ public class HomePresenterImpl implements HomeInterface.HomePresenter {
             mCompositeDisposable.dispose();
     }
 
-    private Date convertStringToDate(String dateString){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = null;
-        try {
-            date = simpleDateFormat.parse(dateString);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return  date;
-    }
 }

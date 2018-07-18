@@ -13,7 +13,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -36,13 +35,10 @@ import com.example.zulu.dvtweatherapp.adapters.TodayWeatherAdapter;
 import com.example.zulu.dvtweatherapp.di.HomeModule;
 import com.example.zulu.dvtweatherapp.di.WeatherModule;
 import com.example.zulu.dvtweatherapp.di.components.DaggerHomeComponent;
-import com.example.zulu.dvtweatherapp.di.components.DaggerWeatherComponent;
 import com.example.zulu.dvtweatherapp.models.CurrentWeatherResponse;
-import com.example.zulu.dvtweatherapp.models.FiveDayWeatherResponse;
 import com.example.zulu.dvtweatherapp.models.WeatherList;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
 import java.util.Date;
@@ -180,6 +176,7 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     @Override
     protected void onDestroy() {
         unregisterReceiver(broadcastReceiver);
+        mHomePresenter.disposeSubscriptions();
         super.onDestroy();
     }
 
@@ -249,22 +246,18 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
         }else{
             if(latitude == 0 && longitude == 0){
                 mFusedLocationClient.getLastLocation()
-                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-
-                                if (location != null) {
-                                    latitude = location.getLatitude();
-                                    longitude = location.getLongitude();
-                                    try {
-                                        cityName =  new Geocoder(getApplicationContext(), Locale.getDefault()).getFromLocation(latitude,longitude,1).get(0).getLocality();
-                                        mTextViewAreaName.setText(cityName);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                    cacheLocationData();
-                                    getWeather();
+                        .addOnSuccessListener(this, (location)-> {
+                            if (location != null) {
+                                latitude = location.getLatitude();
+                                longitude = location.getLongitude();
+                                try {
+                                    cityName =  new Geocoder(getApplicationContext(), Locale.getDefault()).getFromLocation(latitude,longitude,1).get(0).getLocality();
+                                    mTextViewAreaName.setText(cityName);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
+                                cacheLocationData();
+                                getWeather();
                             }
                         });
             }
