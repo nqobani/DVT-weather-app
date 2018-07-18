@@ -1,5 +1,6 @@
 package com.example.zulu.dvtweatherapp.interactors.interfaces;
 
+import com.example.zulu.dvtweatherapp.ui.home.listeners.CurrentWeatherListener;
 import com.example.zulu.dvtweatherapp.ui.home.listeners.FiveDayWeatherForecastListener;
 
 import io.reactivex.disposables.CompositeDisposable;

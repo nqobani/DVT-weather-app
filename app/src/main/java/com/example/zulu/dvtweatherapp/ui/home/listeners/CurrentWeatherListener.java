@@ -1,4 +1,4 @@
-package com.example.zulu.dvtweatherapp.interactors.interfaces;
+package com.example.zulu.dvtweatherapp.ui.home.listeners;
 
 import com.example.zulu.dvtweatherapp.models.CurrentWeatherResponse;
 
