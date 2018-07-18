@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.HomeActivity"
+    android:background="@color/colorSunnyBackground"
+    android:id="@+id/main_container_relative_layout">
+
+    <RelativeLayout
+        android:id="@+id/top_container_relative_layout"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="@drawable/forest_sunny">
+
+        <TextView
+            android:id="@+id/area_name_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="place name"
+            android:layout_margin="20dp"
+            android:textColor="@color/colorTextForeground"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/current_weather_current_temp_big_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="95sp"
+            android:text="0°"
+            android:textColor="@color/colorTextForeground"
+            android:layout_marginTop="25dp"
+            android:layout_centerHorizontal="true"
+            android:paddingBottom="0dp"/>
+
+        <TextView
+            android:id="@+id/current_weather_description_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorTextForeground"
+            android:text="SUNNY"
+            android:textSize="30sp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/current_weather_current_temp_big_textview"/>
+
+        <ToggleButton
+            android:id="@+id/current_weather_toggle_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:textOn="Rest of the day"
+            android:textOff="Current"
+            android:textAllCaps="false"
+            android:textColor="@color/colorTextForeground"
+            android:background="@drawable/my_toggle_button"
+            android:padding="6dp"
+            android:minHeight="15dp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/bottom_container_relative_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_container_relative_layout">
+
+
+        <LinearLayout
+            android:id="@+id/current_weather_main_container_linearlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/today_weather_recyclerview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/current_weather_container_linearlayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/current_weather_min_temp_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="0°"
+                        android:textColor="@color/colorTextForeground"
+                        android:textSize="23sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="min"
+                        android:layout_gravity="center"
+                        android:textColor="@color/colorTextForeground" />
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="7"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/current_weather_current_temp_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="0°"
+                        android:textColor="@color/colorTextForeground"
+                        android:textSize="23sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="Current"
+                        android:textColor="@color/colorTextForeground" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/current_weather_max_temp_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:text="0°"
+                        android:textColor="@color/colorTextForeground"
+                        android:textSize="23sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="max"
+                        android:textColor="@color/colorTextForeground" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+        <View
+            android:id="@+id/line_view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/current_weather_main_container_linearlayout"
+            android:background="@color/colorTextForeground"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/five_day_weather_forecast_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/current_weather_main_container_linearlayout" />
+    </RelativeLayout>
+
+
+</RelativeLayout>

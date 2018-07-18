@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">DVT Weather App</string>
+    <string name="dvt_weather_app_preferences">dvt_weather_app_preferences</string>
+    <string name="latitude">share_preference_latitude</string>
+    <string name="longitude">share_preference_longitude</string>
+    <string name="city_name">share_preference_city_name</string>
+</resources>
