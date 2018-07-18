@@ -19,6 +19,8 @@ public interface HomeInterface {
 
         void setTodayWeatherList(List<WeatherList> weatherList);
 
+        void showError(String errorMessage);
+
     }
 
     interface HomePresenter{

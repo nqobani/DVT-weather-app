@@ -38,7 +38,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/colorTextForeground"
-            android:text="SUNNY"
             android:textSize="30sp"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/current_weather_current_temp_big_textview"/>
@@ -163,7 +162,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/current_weather_main_container_linearlayout"
-            android:background="@color/colorTextForeground"/>
+            android:background="@android:color/white"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/five_day_weather_forecast_recyclerview"

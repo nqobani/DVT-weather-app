@@ -1,14 +1,18 @@
 package com.example.zulu.dvtweatherapp.ui.home;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -23,6 +27,7 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.zulu.dvtweatherapp.R;
@@ -35,6 +40,9 @@ import com.example.zulu.dvtweatherapp.di.components.DaggerWeatherComponent;
 import com.example.zulu.dvtweatherapp.models.CurrentWeatherResponse;
 import com.example.zulu.dvtweatherapp.models.FiveDayWeatherResponse;
 import com.example.zulu.dvtweatherapp.models.WeatherList;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
 import java.util.Date;
@@ -102,6 +110,7 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     private TodayWeatherAdapter mTodayWeatherAdapter;
     private LinearLayoutManager mLinearLayoutManagerTodayWeather;
 
+    private FusedLocationProviderClient mFusedLocationClient;
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
 
@@ -121,6 +130,9 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
         ButterKnife.bind(this);
 
         daggerComponentsSetup();
+
+        mLocationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mSharedPreferences = getSharedPreferences(getResources().getString(R.string.dvt_weather_app_preferences), Context.MODE_PRIVATE);
         mSharedPreferencesEditor = mSharedPreferences.edit();
@@ -149,10 +161,8 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
         cityName = mSharedPreferences.getString(getResources().getString(R.string.city_name),null);
         mTextViewAreaName.setText(cityName);
 
-        getWeather();
-
+        registerReceiver(broadcastReceiver,new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
         requestLocation();
-
     }
 
     @Override
@@ -165,6 +175,12 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     protected void onPause() {
         mHandler.removeCallbacks(mRunnableOnRequestLocation);
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(broadcastReceiver);
+        super.onDestroy();
     }
 
     private void requestLocation(){
@@ -189,7 +205,6 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
 
     @Override
     public void getCurrentLocation() {
-        mLocationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -199,15 +214,12 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
                 try {
                     cityName =  new Geocoder(getApplicationContext(), Locale.getDefault()).getFromLocation(latitude,longitude,1).get(0).getLocality();
                     mTextViewAreaName.setText(cityName);
+                    //If the city hasn't changed and the hours has not passed since the last api call, do not make an API call.
                     if(cityName.equals(mSharedPreferences.getString(getResources().getString(R.string.city_name),null)) && !canMakeAPICall()){
                         mLocationManager.removeUpdates(mLocationListener);
                         return;
                     }
-
-                    mSharedPreferencesEditor.putFloat(getResources().getString(R.string.latitude),latitude.floatValue());
-                    mSharedPreferencesEditor.putFloat(getResources().getString(R.string.longitude),longitude.floatValue());
-                    mSharedPreferencesEditor.putString(getResources().getString(R.string.city_name),cityName);
-                    mSharedPreferencesEditor.commit();
+                    cacheLocationData();
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -235,7 +247,28 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String [] {Manifest.permission.ACCESS_FINE_LOCATION},1);
         }else{
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (DateUtils.MINUTE_IN_MILLIS), 5000, mLocationListener);
+            if(latitude == 0 && longitude == 0){
+                mFusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+
+                                if (location != null) {
+                                    latitude = location.getLatitude();
+                                    longitude = location.getLongitude();
+                                    try {
+                                        cityName =  new Geocoder(getApplicationContext(), Locale.getDefault()).getFromLocation(latitude,longitude,1).get(0).getLocality();
+                                        mTextViewAreaName.setText(cityName);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    cacheLocationData();
+                                    getWeather();
+                                }
+                            }
+                        });
+            }
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 5000, mLocationListener);
         }
     }
 
@@ -245,7 +278,7 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
 
         if(permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
             if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, (DateUtils.MINUTE_IN_MILLIS), 5000, mLocationListener);
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 5000, mLocationListener);
             }
         }
     }
@@ -294,8 +327,13 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
 
     }
 
+    @Override
+    public void showError(String errorMessage) {
+        Toast.makeText(getApplicationContext(), errorMessage,Toast.LENGTH_LONG).show();
+    }
+
     //When the user doesn't kill an app for an hour, allow the app to make the API call and update the content
-    public Boolean canMakeAPICall(){
+    private Boolean canMakeAPICall(){
         if(lastUpdate==null)
             return true;
 
@@ -306,6 +344,12 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
             return true;
         else
             return false;
+    }
+    private void cacheLocationData(){
+        mSharedPreferencesEditor.putFloat(getResources().getString(R.string.latitude),latitude.floatValue());
+        mSharedPreferencesEditor.putFloat(getResources().getString(R.string.longitude),longitude.floatValue());
+        mSharedPreferencesEditor.putString(getResources().getString(R.string.city_name),cityName);
+        mSharedPreferencesEditor.commit();
     }
 
     public void updateUI(String weatherDescription){
@@ -322,4 +366,23 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
             mRalativeLayoutMainContainer.setBackgroundColor(getResources().getColor(R.color.colorRainyBackground));
         }
     }
+
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connectivityManager =(ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+            if(networkInfo != null){
+                if(networkInfo.getType() == ConnectivityManager.TYPE_MOBILE || networkInfo.getType() == ConnectivityManager.TYPE_WIFI ){
+                    getWeather();
+                }else{
+                    Toast.makeText(getApplicationContext(),"No Internet connection",Toast.LENGTH_LONG).show();
+                }
+            }else{
+                Toast.makeText(getApplicationContext(),"No Internet connection",Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
 }

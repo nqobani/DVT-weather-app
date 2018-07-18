@@ -44,7 +44,8 @@ public class HomePresenterImpl implements HomeInterface.HomePresenter {
 
             @Override
             public void onError(Throwable throwable) {
-                String nnn = "";
+                //this is not the right way of handling/presenting errors
+                mHomeView.showError("Cannot get weather data, please check your Internet connectivity");
             }
         });
     }
@@ -87,7 +88,8 @@ public class HomePresenterImpl implements HomeInterface.HomePresenter {
 
             @Override
             public void onError(Throwable e) {
-                String xx="";
+                //this is not the right way of handling/presenting errors
+                mHomeView.showError("Cannot get weather data, please check your Internet connectivity");
             }
         });
     }
