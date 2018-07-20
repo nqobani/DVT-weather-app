@@ -33,9 +33,9 @@ public class WeatherInteractorImpl implements WeatherInteractor {
     }
 
     @Override
-    public void getFiveDayWeatherForecast(CompositeDisposable compositeDisposable, Double lat, Double lon, FiveDayWeatherForecastListener fiveDayWeatherForecastListener) {
+    public void getFiveDayWeatherForecast(CompositeDisposable compositeDisposable, int cityId, FiveDayWeatherForecastListener fiveDayWeatherForecastListener) {
         compositeDisposable.add(
-                mWeatherGateway.getFiveDayWeatherForecast(lat,lon).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                mWeatherGateway.getFiveDayWeatherForecast(cityId).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
                         .subscribe((fiveDayWeatherResponse) -> {
                                     fiveDayWeatherForecastListener.onSuccess(fiveDayWeatherResponse);
                                 },

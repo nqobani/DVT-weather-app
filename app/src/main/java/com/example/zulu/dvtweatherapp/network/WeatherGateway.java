@@ -20,8 +20,8 @@ public class WeatherGateway {
         mWeatherAPIGateway = weatherAPIGateway;
     }
 
-    public Observable<FiveDayWeatherResponse> getFiveDayWeatherForecast(Double lat, Double lon){
-        return mWeatherAPIGateway.getFiveDateWeatherForecast(lat, lon, mContext.getResources().getString(R.string.weather_api_app_id),"metric");
+    public Observable<FiveDayWeatherResponse> getFiveDayWeatherForecast(int cityId){
+        return mWeatherAPIGateway.getFiveDateWeatherForecast(cityId, mContext.getResources().getString(R.string.weather_api_app_id),"metric");
     }
 
     public Observable<CurrentWeatherResponse> getCurrentWeather(Double lat, Double lon){

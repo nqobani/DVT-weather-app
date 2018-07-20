@@ -11,8 +11,7 @@ import retrofit2.http.Query;
 public interface WeatherAPIGateway {
 
     @GET("forecast")
-    Observable<FiveDayWeatherResponse> getFiveDateWeatherForecast(@Query("lat") Double lat,
-                                                              @Query("lon") Double lon,
+    Observable<FiveDayWeatherResponse> getFiveDateWeatherForecast(@Query("id") int cityId,
                                                               @Query("appid") String appId,
                                                               @Query("units") String unit);
 

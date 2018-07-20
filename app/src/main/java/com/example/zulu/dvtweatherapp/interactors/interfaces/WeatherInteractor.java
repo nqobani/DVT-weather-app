@@ -9,6 +9,6 @@ public interface WeatherInteractor {
 
     void getCurrentWeatherForecast(CompositeDisposable compositeDisposable, Double lat, Double lon, CurrentWeatherListener currentWeatherListener);
 
-    void getFiveDayWeatherForecast(CompositeDisposable compositeDisposable, Double lat, Double lon, FiveDayWeatherForecastListener fiveDayWeatherForecastListener);
+    void getFiveDayWeatherForecast(CompositeDisposable compositeDisposable, int cityId, FiveDayWeatherForecastListener fiveDayWeatherForecastListener);
 
 }

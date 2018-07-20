@@ -101,8 +101,8 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
 
     private FusedLocationProviderClient mFusedLocationClient;
 
-    private Double latitude = 0.0;
-    private Double longitude = 0.0;
+    private Double latitude;
+    private Double longitude;
     private String cityName;
 
     private Handler mHandler;
@@ -236,8 +236,7 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
 
         isInitialCall = false;
         lastUpdate = new Date();
-        mHomePresenter.getCurrebtWeather(latitude, longitude);
-        mHomePresenter.getFiveDayWeatherForecast(latitude, longitude);
+        mHomePresenter.getCurrentWeather(latitude, longitude);
     }
 
     @Override

@@ -23,9 +23,9 @@ public interface HomeInterface {
     }
 
     interface HomePresenter{
-        void getCurrebtWeather(Double lat, Double lon);
+        void getCurrentWeather(Double lat, Double lon);
 
-        void getFiveDayWeatherForecast(Double lat, Double lon);
+        void getFiveDayWeatherForecast(int cityId);
 
         void disposeSubscriptions();
     }

@@ -34,11 +34,12 @@ public class HomePresenterImpl implements HomeInterface.HomePresenter {
     }
 
     @Override
-    public void getCurrebtWeather(Double lat, Double lon) {
+    public void getCurrentWeather(Double lat, Double lon) {
         mWeatherInteractor.getCurrentWeatherForecast(mCompositeDisposable, lat, lon, new CurrentWeatherListener() {
             @Override
             public void onSuccess(CurrentWeatherResponse currentWeatherResponse) {
                 mHomeView.setCurrentWeather(currentWeatherResponse);
+                getFiveDayWeatherForecast(currentWeatherResponse.getId());
             }
 
             @Override
@@ -50,8 +51,8 @@ public class HomePresenterImpl implements HomeInterface.HomePresenter {
     }
 
     @Override
-    public void getFiveDayWeatherForecast(Double lat, Double lon) {
-        mWeatherInteractor.getFiveDayWeatherForecast(mCompositeDisposable, lat, lon, new FiveDayWeatherForecastListener() {
+    public void getFiveDayWeatherForecast(int cityId) {
+        mWeatherInteractor.getFiveDayWeatherForecast(mCompositeDisposable, cityId, new FiveDayWeatherForecastListener() {
             @Override
             public void onSuccess(FiveDayWeatherResponse fiveDayWeatherResponse) {
                 List<WeatherList> weatherLists = new ArrayList<>();
