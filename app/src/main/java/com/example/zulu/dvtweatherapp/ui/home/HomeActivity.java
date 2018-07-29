@@ -5,9 +5,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
@@ -34,6 +36,9 @@ import com.example.zulu.dvtweatherapp.di.components.DaggerHomeComponent;
 import com.example.zulu.dvtweatherapp.models.CurrentWeatherResponse;
 import com.example.zulu.dvtweatherapp.models.WeatherList;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
@@ -100,6 +105,8 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     private LinearLayoutManager mLinearLayoutManagerTodayWeather;
 
     private FusedLocationProviderClient mFusedLocationClient;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
 
     private Double latitude;
     private Double longitude;
@@ -111,6 +118,10 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     private Date lastUpdate;
 
     private boolean isInitialCall = true;
+
+    SharedPreferences mSharedPreferences;
+    SharedPreferences.Editor mSharedPreferencesEditor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +129,10 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
         ButterKnife.bind(this);
 
         daggerComponentsSetup();
+
+        mSharedPreferences = getSharedPreferences(getResources().getString(R.string.dvt_weather_app_preferences), Context.MODE_PRIVATE);
+        mSharedPreferencesEditor = mSharedPreferences.edit();
+
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -137,7 +152,14 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
             }
         });
 
+        latitude = (double) mSharedPreferences.getFloat(getResources().getString(R.string.latitude), 0f);
+        longitude = (double) mSharedPreferences.getFloat(getResources().getString(R.string.longitude), 0f);
+        cityName = mSharedPreferences.getString(getResources().getString(R.string.city_name),null);
+        mTextViewAreaName.setText(cityName);
+        getWeather();
+
         registerReceiver(broadcastReceiver,new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
+        createLocationRequest();
         requestLocation();
     }
 
@@ -150,6 +172,7 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     @Override
     protected void onPause() {
         mHandler.removeCallbacks(mRunnableOnRequestLocation);
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         super.onPause();
     }
 
@@ -163,14 +186,38 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     private void requestLocation(){
         mHandler = new Handler();
         mRunnableOnRequestLocation = () -> {
-            getCurrentLocation();
+            getLocation();
             //Check for location updates every 10 minutes
             mHandler.postDelayed(mRunnableOnRequestLocation, (DateUtils.MINUTE_IN_MILLIS * 10));
         };
     }
 
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+
+                if(locationResult.getLocations().size()>0){
+                    Location location =  locationResult.getLocations().get(0);
+                    userLocationData(location);
+                }
+
+                mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+            };
+        };
+    }
+
     private void daggerComponentsSetup() {
         mWeatherComponent.Inject(this);
+
         DaggerHomeComponent.builder()
                 .homeModule(new HomeModule(this))
                 .weatherModule(new WeatherModule(this))
@@ -179,42 +226,56 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     }
 
     @Override
-    public void getCurrentLocation() {
+    public void getLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String [] {Manifest.permission.ACCESS_FINE_LOCATION},1);
         }else{
+            //start location updates
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                    mLocationCallback,
+                    null);
+
+            //Get the last known location of a device. The last know location of a device get cleared when the
+            //user turn the location off on a device.
             mFusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, (location)-> {
-                        if (location != null) {
-                            latitude = location.getLatitude();
-                            longitude = location.getLongitude();
-                            try {
-                                List<Address> addresses =  new Geocoder(getApplicationContext(), Locale.getDefault()).getFromLocation(latitude,longitude,1);
-
-                                if(addresses.size()>0){
-                                    if(cityName==null
-                                            ||!cityName.equals(addresses.get(0).getLocality())
-                                            ||isInitialCall
-                                            ||canMakeAPICall()){
-
-                                        cityName = addresses.get(0).getLocality();
-                                        mTextViewAreaName.setText(cityName);
-                                        getWeather();
-                                    }
-                                } else {
-                                    if(mTextViewAreaName.getText().equals(getResources().getString(R.string.location_unkown)) && !canMakeAPICall())
-                                        return;
-
-                                    mTextViewAreaName.setText(getResources().getString(R.string.location_unkown));
-                                    getWeather();
-
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
+                        userLocationData(location);
                     });
+        }
+    }
+
+    private void userLocationData(Location location){
+        if (location != null) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            try {
+                List<Address> addresses =  new Geocoder(getApplicationContext(), Locale.getDefault()).getFromLocation(latitude,longitude,1);
+
+                if(addresses.size()>0){
+                    if(cityName==null
+                            ||!cityName.equals(addresses.get(0).getLocality())
+                            ||isInitialCall
+                            ||canMakeAPICall()){
+
+                        cityName = addresses.get(0).getLocality();
+                        mTextViewAreaName.setText(cityName);
+                        cacheLocationData();
+                        getWeather();
+                    }
+                } else {
+                    if(mTextViewAreaName.getText().equals(getResources().getString(R.string.location_unkown)) && !canMakeAPICall())
+                        return;
+
+                    mTextViewAreaName.setText(getResources().getString(R.string.location_unkown));
+                    cityName = getResources().getString(R.string.location_unkown);
+                    cacheLocationData();
+                    getWeather();
+
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -224,7 +285,7 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
 
         if(permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
             if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-                getCurrentLocation();
+                getLocation();
             }
         }
     }
@@ -277,6 +338,16 @@ public class HomeActivity extends AppCompatActivity implements HomeInterface.Hom
     public void showError(String errorMessage) {
         Toast.makeText(getApplicationContext(), errorMessage,Toast.LENGTH_LONG).show();
     }
+
+    private void cacheLocationData(){
+        //This data is useful when the user has turned of the location off an device and it helps to speed up
+        //the precess if the user is still in the same city.
+        mSharedPreferencesEditor.putFloat(getResources().getString(R.string.latitude),latitude.floatValue());
+        mSharedPreferencesEditor.putFloat(getResources().getString(R.string.longitude),longitude.floatValue());
+        mSharedPreferencesEditor.putString(getResources().getString(R.string.city_name),cityName);
+        mSharedPreferencesEditor.commit();
+    }
+
 
     //When the user doesn't kill an app for an hour, allow the app to make the API call and update the content
     private Boolean canMakeAPICall(){

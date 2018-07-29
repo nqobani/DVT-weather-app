@@ -8,7 +8,7 @@ import java.util.List;
 public interface HomeInterface {
     interface HomeView{
 
-        void getCurrentLocation();
+        void getLocation();
 
         void getWeather();
 
